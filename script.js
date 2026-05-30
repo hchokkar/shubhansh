@@ -114,10 +114,46 @@ setInterval(createSpark, 1100);
 // Open letter toggle
 const openLetterBtn = document.getElementById('openLetterBtn');
 const letter = document.getElementById('letter');
+const finalDecision = document.getElementById('finalDecision');
+const letterParagraphs = Array.from(letter.querySelectorAll('p'));
+
+letterParagraphs.forEach(p => {
+  if(!p.dataset.text){
+    p.dataset.text = p.textContent.trim();
+  }
+  p.textContent = '';
+});
+
+function wait(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function typeParagraph(paragraph){
+  paragraph.classList.add('visible','current');
+  const text = paragraph.dataset.text || '';
+  for(let i = 0; i < text.length; i++){
+    paragraph.textContent += text[i];
+    await wait(18);
+  }
+  paragraph.classList.remove('current');
+  await wait(220);
+}
+
+async function startTypewriter(){
+  openLetterBtn.disabled = true;
+  openLetterBtn.textContent = 'Opening your story...';
+  for(const paragraph of letterParagraphs){
+    await typeParagraph(paragraph);
+  }
+  finalDecision.style.display = 'block';
+  finalDecision.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
 openLetterBtn.addEventListener('click', () => {
   if(letter.style.display === 'none' || !letter.style.display){
     letter.style.display = 'block';
     openLetterBtn.style.display = 'none';
+    startTypewriter();
   }
 });
 
