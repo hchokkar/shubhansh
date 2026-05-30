@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>My Partner In Crime ❤️</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -41,7 +42,10 @@
     <div class="success" id="successMsg" role="status">🎉 YAYYYY!!! I Knew It ❤️❤️❤️</div>
 
     <div class="music-toggle">
-      <button id="musicBtn" aria-pressed="false">Play Music</button>
+      <button id="musicBtn" aria-pressed="false" disabled>Play Music</button>
+      <button id="chooseMusicBtn">Choose Music</button>
+      <input id="musicFileInput" type="file" accept="audio/*" style="display:none">
+      <span id="trackName" class="track-name">No track selected</span>
     </div>
 
   </div>

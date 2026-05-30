@@ -133,15 +133,52 @@ function launchFireworks(x, y){
 // Music toggle (requires user-provided file)
 const musicBtn = document.getElementById('musicBtn');
 const audio = document.getElementById('romanceAudio');
-musicBtn.addEventListener('click', ()=>{
+const chooseMusicBtn = document.getElementById('chooseMusicBtn');
+const musicFileInput = document.getElementById('musicFileInput');
+const trackName = document.getElementById('trackName');
+
+function setTrackFromFile(file){
+  if(!file) return;
+  const url = URL.createObjectURL(file);
+  audio.src = url;
+  audio.load();
+  trackName.textContent = file.name;
+  musicBtn.disabled = false;
+}
+
+chooseMusicBtn.addEventListener('click', ()=>musicFileInput.click());
+musicFileInput.addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(f) setTrackFromFile(f);
+});
+
+musicBtn.addEventListener('click', async ()=>{
   if(!audio) return;
-  if(audio.paused){
-    audio.play().catch(()=>{});
-    musicBtn.textContent = 'Pause Music';
-    musicBtn.setAttribute('aria-pressed','true');
-  } else {
-    audio.pause();
-    musicBtn.textContent = 'Play Music';
-    musicBtn.setAttribute('aria-pressed','false');
+  try{
+    if(audio.paused){
+      await audio.play();
+      musicBtn.textContent = 'Pause Music';
+      musicBtn.setAttribute('aria-pressed','true');
+    } else {
+      audio.pause();
+      musicBtn.textContent = 'Play Music';
+      musicBtn.setAttribute('aria-pressed','false');
+    }
+  }catch(err){
+    console.warn('Playback failed', err);
+    trackName.textContent = 'Playback failed — choose another file or allow audio playback.';
   }
 });
+
+audio.addEventListener('error', ()=>{
+  trackName.textContent = 'Unable to play the selected track.';
+  musicBtn.disabled = true;
+});
+
+// If there's an existing file at the static path, enable play
+fetch('your-romantic-song.mp3', {method:'HEAD'}).then(r=>{
+  if(r.ok){
+    musicBtn.disabled = false;
+    trackName.textContent = 'your-romantic-song.mp3';
+  }
+}).catch(()=>{});
