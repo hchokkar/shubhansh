@@ -96,6 +96,21 @@ function createRose(){
 }
 setInterval(createRose, 200);
 
+// Soft sparkle effect for neon ambiance
+function createSpark(){
+  const spark = document.createElement('div');
+  spark.className = 'spark';
+  const size = 4 + Math.random()*5;
+  spark.style.width = size + 'px';
+  spark.style.height = size + 'px';
+  spark.style.left = Math.random()*90 + '5vw';
+  spark.style.top = window.innerHeight * (0.4 + Math.random()*0.4) + 'px';
+  spark.style.background = ['#ff8cb6','#ffd369','#ff6ba5','#ffb5d8'][Math.floor(Math.random()*4)];
+  document.body.appendChild(spark);
+  setTimeout(()=>spark.remove(), 2200);
+}
+setInterval(createSpark, 1100);
+
 // Open letter toggle
 const openLetterBtn = document.getElementById('openLetterBtn');
 const letter = document.getElementById('letter');
