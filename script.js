@@ -146,16 +146,11 @@ async function startTypewriter(){
     await typeParagraph(paragraph);
   }
   finalDecision.style.display = 'block';
+  noBtn.style.display = 'none';
+  noBtn.disabled = true;
+  noBtn.setAttribute('aria-hidden', 'true');
   finalDecision.scrollIntoView({behavior:'smooth', block:'start'});
 }
-
-openLetterBtn.addEventListener('click', () => {
-  if(letter.style.display === 'none' || !letter.style.display){
-    letter.style.display = 'block';
-    openLetterBtn.style.display = 'none';
-    startTypewriter();
-  }
-});
 
 // Simple fireworks/confetti effect
 function launchFireworks(x, y){
@@ -181,55 +176,55 @@ function launchFireworks(x, y){
   }
 }
 
-// Music toggle (requires user-provided file)
-const musicBtn = document.getElementById('musicBtn');
 const audio = document.getElementById('romanceAudio');
-const chooseMusicBtn = document.getElementById('chooseMusicBtn');
-const musicFileInput = document.getElementById('musicFileInput');
-const trackName = document.getElementById('trackName');
+const musicBtn = document.getElementById('musicBtn');
 
-function setTrackFromFile(file){
-  if(!file) return;
-  const url = URL.createObjectURL(file);
-  audio.src = url;
-  audio.load();
-  trackName.textContent = file.name;
-  musicBtn.disabled = false;
+function updateMusicButton(){
+  if(!musicBtn || !audio) return;
+  musicBtn.textContent = audio.paused ? 'Play Music' : 'Pause Music';
+  musicBtn.setAttribute('aria-pressed', String(!audio.paused));
 }
 
-chooseMusicBtn.addEventListener('click', ()=>musicFileInput.click());
-musicFileInput.addEventListener('change', (e)=>{
-  const f = e.target.files && e.target.files[0];
-  if(f) setTrackFromFile(f);
-});
-
-musicBtn.addEventListener('click', async ()=>{
+async function attemptAutoPlay(){
   if(!audio) return;
+  audio.volume = 0.55;
   try{
-    if(audio.paused){
-      await audio.play();
-      musicBtn.textContent = 'Pause Music';
-      musicBtn.setAttribute('aria-pressed','true');
-    } else {
-      audio.pause();
-      musicBtn.textContent = 'Play Music';
-      musicBtn.setAttribute('aria-pressed','false');
-    }
+    await audio.play();
+    updateMusicButton();
   }catch(err){
-    console.warn('Playback failed', err);
-    trackName.textContent = 'Playback failed — choose another file or allow audio playback.';
+    updateMusicButton();
+  }
+}
+
+if(musicBtn){
+  musicBtn.addEventListener('click', async () => {
+    if(!audio) return;
+    try{
+      if(audio.paused){
+        await audio.play();
+      } else {
+        audio.pause();
+      }
+    }catch(err){
+      console.warn('Music toggle failed', err);
+    }
+    updateMusicButton();
+  });
+}
+
+window.addEventListener('load', attemptAutoPlay);
+
+openLetterBtn.addEventListener('click', () => {
+  if(letter.style.display === 'none' || !letter.style.display){
+    letter.style.display = 'block';
+    openLetterBtn.style.display = 'none';
+    attemptAutoPlay();
+    startTypewriter();
   }
 });
 
+audio.addEventListener('play', updateMusicButton);
+audio.addEventListener('pause', updateMusicButton);
 audio.addEventListener('error', ()=>{
-  trackName.textContent = 'Unable to play the selected track.';
-  musicBtn.disabled = true;
+  console.warn('Unable to play the selected track.');
 });
-
-// If there's an existing file at the static path, enable play
-fetch('your-romantic-song.mp3', {method:'HEAD'}).then(r=>{
-  if(r.ok){
-    musicBtn.disabled = false;
-    trackName.textContent = 'your-romantic-song.mp3';
-  }
-}).catch(()=>{});
